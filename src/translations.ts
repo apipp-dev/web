@@ -1,5 +1,6 @@
 export const translations = {
   id: {
+    "nav.home": "BERANDA",
     "nav.about": "TENTANG",
     "nav.stats": "STATISTIK",
     "nav.tools": "KEAHLIAN",
@@ -10,7 +11,7 @@ export const translations = {
     "nav.pricing": "HARGA",
     "nav.faq": "FAQ",
     "nav.cta": "HUBUNGI",
-    "hero.sub": "SENIMAN VISUAL BERBASIS AI",
+    "hero.sub": "VISUAL STORYTELLER",
     "hero.desc": "Bukan sekadar memotong klip. Saya merangkai cerita sinematik, fotografi profesional, dan visual berbasis AI.",
     "hero.btn_work": "LIHAT KARYA",
     "hero.btn_talk": "LET'S TALK",
@@ -88,6 +89,7 @@ export const translations = {
     "pricing.short.desc": "Cocok untuk TikTok, Reels, Shorts — konten vertikal 15–90 detik yang engaging & ready to post.",
     "pricing.cine.desc": "Cocok untuk Wedding, Travel, Brand — editing cinematic + color grading + 2× revisi.",
     "pricing.full.desc": "Cocok untuk Brand besar yang butuh paket lengkap: video, web, branding & strategi konten.",
+    "pricing.select": "Pilih Paket",
     "faq.subtitle": "CLIENT CONCERNS",
     "faq.q1": "Berapa lama estimasi pengerjaan?",
     "faq.a1": "Short-Form 2–3 hari kerja, Cinematic 4–7 hari kerja. Timeline spesifik selalu disepakati di awal proyek.",
@@ -99,6 +101,7 @@ export const translations = {
     "contact.btn": "Get In Touch",
   },
   en: {
+    "nav.home": "HOME",
     "nav.about": "ABOUT",
     "nav.stats": "STATS",
     "nav.tools": "SKILLS",
@@ -109,7 +112,7 @@ export const translations = {
     "nav.pricing": "RATES",
     "nav.faq": "FAQ",
     "nav.cta": "HIRE ME",
-    "hero.sub": "AI-POWERED VISUAL ARTIST",
+    "hero.sub": "VISUAL STORYTELLER",
     "hero.desc": "I don't just cut clips. I craft cinematic stories, professional photography, and AI-powered visuals that move between technology and human emotion.",
     "hero.btn_work": "VIEW PORTFOLIO",
     "hero.btn_talk": "LET'S TALK",
@@ -187,6 +190,7 @@ export const translations = {
     "pricing.short.desc": "Suitable for TikTok, Reels, Shorts — vertical content 15–90 seconds, engaging & ready to post.",
     "pricing.cine.desc": "Suitable for Wedding, Travel, Brand — cinematic editing + color grading + 2× revisions.",
     "pricing.full.desc": "Suitable for Large brands needing a complete package: video, web, branding & content strategy.",
+    "pricing.select": "Select Plan",
     "faq.subtitle": "CLIENT CONCERNS",
     "faq.q1": "What's the turnaround time?",
     "faq.a1": "Short-Form 2–3 business days, Cinematic 4–7 business days. Specific timelines are always agreed upfront.",

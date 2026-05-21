@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, Mail, MessageCircle, Instagram, Video, ChevronDown, Send, ArrowRight, Zap, Camera, Monitor, Smartphone, Globe, Target, Clock, Trophy, Share2, Layers } from 'lucide-react';
+import { Menu, X, Mail, MessageCircle, Instagram, Video, ChevronDown, Send, ArrowRight, Zap, Camera, Monitor, Smartphone, Globe, Target, Clock, Trophy, Share2, Layers, Sun } from 'lucide-react';
 import { useTranslation } from '../context/LanguageContext';
 import { Counter } from './Counter';
 import { ColorComparison } from './ColorComparison';
@@ -9,16 +9,103 @@ export const MainApp = () => {
   const { lang, t, setLanguage } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [openFaqIndex, setOpenFaqIndex] = React.useState<number | null>(null);
+  const [isIslandHovered, setIsIslandHovered] = React.useState(false);
+  const [isSolarActive, setIsSolarActive] = React.useState(false);
+
+  const heroVideoRef = React.useRef<HTMLVideoElement>(null);
+
+  React.useEffect(() => {
+    const video = heroVideoRef.current;
+    if (!video) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      },
+      { threshold: 0.05, rootMargin: '100px' }
+    );
+
+    observer.observe(video);
+    return () => {
+      observer.unobserve(video);
+    };
+  }, []);
+
+  // Live Performance Dashboard States
+  const [tiktokViewsVal, setTiktokViewsVal] = React.useState(53600);
+  const [tiktokLikesVal, setTiktokLikesVal] = React.useState(5372);
+  const [igReachVal, setIgReachVal] = React.useState(7252);
+  const [igTotalViewsVal, setIgTotalViewsVal] = React.useState(30783);
+
+  const [topVid1, setTopVid1] = React.useState(9660);
+  const [topVid2, setTopVid2] = React.useState(8691);
+  const [topVid3, setTopVid3] = React.useState(6885);
+
+  const [flashCard, setFlashCard] = React.useState<Record<string, boolean>>({});
+
+  React.useEffect(() => {
+    const logTemplates = [
+      { text: 'Seseorang follow TikTok @apippppokonya dari Jakarta', increment: { target: 'tiktokViews', amount: 1 }, type: 'info', tag: 'FOLLOWER' },
+      { text: 'Video #1 (#sunset) mendapat penonton baru', increment: { target: 'topVid1', amount: 14 }, type: 'increase', tag: '+14 views' },
+      { text: 'Seseorang menyukai video #aesthetic di TikTok', increment: { target: 'tiktokLikes', amount: 2 }, type: 'increase', tag: '+2 likes' },
+      { text: 'Video #1 (#sunset) dibagikan ke platform lain', increment: { target: 'tiktokViews', amount: 5 }, type: 'share', tag: '+5 views' },
+      { text: 'Views Instagram Story meningkat dari Bandung', increment: { target: 'igTotalViews', amount: 4 }, type: 'increase', tag: '+4 views' },
+      { text: 'Views Instagram Story meningkat dari Surabaya', increment: { target: 'igTotalViews', amount: 3 }, type: 'increase', tag: '+3 views' },
+      { text: 'Reach organik baru di Instagram Reels', increment: { target: 'igReach', amount: 6 }, type: 'increase', tag: '+6 reach' },
+      { text: 'Video lupa up mendapat penayangan baru', increment: { target: 'topVid3', amount: 8 }, type: 'increase', tag: '+8 views' },
+      { text: 'Video #photography mendapat penayangan baru', increment: { target: 'topVid2', amount: 11 }, type: 'increase', tag: '+11 views' },
+    ];
+
+    const interval = setInterval(() => {
+      const template = logTemplates[Math.floor(Math.random() * logTemplates.length)];
+      
+      const now = new Date();
+      const timeString = now.toTimeString().split(' ')[0];
+
+      const { target, amount } = template.increment;
+      
+      setFlashCard(prev => ({ ...prev, [target]: true }));
+      setTimeout(() => {
+        setFlashCard(prev => ({ ...prev, [target]: false }));
+      }, 1000);
+
+      if (target === 'tiktokViews') {
+        setTiktokViewsVal(v => v + amount);
+      } else if (target === 'tiktokLikes') {
+        setTiktokLikesVal(v => v + amount);
+      } else if (target === 'igReach') {
+        setIgReachVal(v => v + amount);
+      } else if (target === 'igTotalViews') {
+        setIgTotalViewsVal(v => v + amount);
+      } else if (target === 'topVid1') {
+        setTopVid1(v => v + amount);
+        setTiktokViewsVal(v => v + amount);
+      } else if (target === 'topVid2') {
+        setTopVid2(v => v + amount);
+        setTiktokViewsVal(v => v + amount);
+      } else if (target === 'topVid3') {
+        setTopVid3(v => v + amount);
+        setTiktokViewsVal(v => v + amount);
+      }
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   const navItems = [
-    { id: 'stats', label: 'nav.stats' },
+    { id: 'home', label: 'nav.home' },
     { id: 'about', label: 'nav.about' },
     { id: 'tools', label: 'nav.tools' },
     { id: 'work', label: 'nav.works' },
-    { id: 'workflow', label: 'nav.workflow' },
     { id: 'journey', label: 'nav.experience' },
+    { id: 'workflow', label: 'nav.workflow' },
+    { id: 'stats', label: 'nav.stats' },
     { id: 'pricing', label: 'nav.pricing' },
     { id: 'faq', label: 'nav.faq' },
   ];
@@ -28,16 +115,85 @@ export const MainApp = () => {
       {/* Liquid Background */}
       <div className="liquid-bg" aria-hidden="true" />
 
-      {/* Dynamic Island */}
+      {/* Ambient solar overlay */}
+      {isSolarActive && (
+        <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(0,242,254,0.12),transparent_70%)] pointer-events-none z-[9999] transition-all duration-700 animate-pulse" />
+      )}
+
+      {/* Dynamic Island matching IOS-style active widget */}
       <motion.div 
-        className="fixed top-4 left-1/2 -translate-x-1/2 z-[9980] hidden md:block bg-black/88 backdrop-blur-3xl saturate-200 border border-white/10 rounded-[3rem] px-5 py-2 shadow-2xl"
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        whileHover={{ scale: 1.05 }}
+        className="fixed top-4 left-1/2 z-[9980] flex items-center justify-between bg-black/92 backdrop-blur-3xl saturate-200 border border-white/10 shadow-2xl cursor-pointer md:cursor-default text-left overflow-hidden"
+        initial={{ x: '-50%', y: -100, opacity: 0 }}
+        animate={{ 
+          x: '-50%', 
+          y: 0, 
+          opacity: 1,
+          width: isIslandHovered ? 340 : 220,
+          height: isIslandHovered ? 48 : 36,
+          borderRadius: isIslandHovered ? '20px' : '30px',
+          borderColor: isIslandHovered ? 'rgba(0,242,254,0.35)' : 'rgba(255,255,255,0.1)',
+        }}
+        onMouseEnter={() => setIsIslandHovered(true)}
+        onMouseLeave={() => setIsIslandHovered(false)}
+        onClick={() => {
+          if (window.innerWidth < 768) {
+            setIsIslandHovered(!isIslandHovered);
+          }
+        }}
+        transition={{
+          type: 'spring',
+          stiffness: 350,
+          damping: 25
+        }}
+        layout
       >
-        <div className="flex items-center gap-2 font-black text-[10px] text-gray-400 uppercase tracking-widest">
-          <div className="w-1.5 h-1.5 rounded-full bg-cyan shadow-[0_0_6px_var(--color-cyan)] animate-pulse" />
-          Active · Ready to create
+        <div className="flex items-center justify-between w-full h-full px-5">
+          {!isIslandHovered ? (
+            <div className="flex items-center justify-center w-full gap-2 font-sans">
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan/70 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan shadow-[0_0_8px_rgba(0,242,254,0.6)]"></span>
+              </span>
+              <span className="text-[11px] font-bold text-gray-200 tracking-wide whitespace-nowrap">
+                Active <span className="text-gray-500 mx-1">-</span> Ready to create
+              </span>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-2.5">
+                <div className="relative flex items-center justify-center shrink-0">
+                  <div className="w-1.5 h-1.5 rounded-full bg-cyan shadow-[0_0_8px_var(--color-cyan)] animate-pulse" />
+                  <div className="absolute w-3.5 h-3.5 rounded-full border border-cyan/30 animate-ping" />
+                </div>
+                
+                <div className="flex flex-col justify-center">
+                  <span className="font-black text-[10px] text-gray-500 uppercase tracking-widest leading-none">Active</span>
+                  <motion.span 
+                    className="font-bold text-[8px] text-gray-400 mt-1"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                  >
+                    Ready to create
+                  </motion.span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="flex flex-col text-right justify-center">
+                  <span className="font-black text-[9px] text-cyan uppercase tracking-widest whitespace-nowrap leading-none">
+                    {t('hero.sub')}
+                  </span>
+                  <motion.span 
+                    className="font-bold text-[8px] text-violet-light mt-1 uppercase tracking-widest"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                  >
+                    MUHAMMAD AFIF
+                  </motion.span>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </motion.div>
 
@@ -46,33 +202,58 @@ export const MainApp = () => {
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div 
-              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-44 bg-black/95 backdrop-blur-3xl border border-white/10 rounded-2xl p-2 shadow-2xl flex flex-col gap-0.5"
-              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-52 bg-[#020205]/95 backdrop-blur-3xl border border-white/10 rounded-[1.8rem] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col"
+              initial={{ opacity: 0, y: 15, scale: 0.92 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+              exit={{ opacity: 0, y: 15, scale: 0.92 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 26 }}
             >
-              {navItems.map((item) => (
-                <a
-                  key={item.id}
-                  href={`#${item.id}`}
-                  onClick={() => setIsMenuOpen(false)}
-                  className="px-4 py-2 rounded-lg text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-cyan hover:bg-cyan/10 transition-all"
-                >
-                  {t(item.label)}
-                </a>
-              ))}
-              <div className="mt-2 pt-2 border-t border-white/5 flex gap-2 justify-center pb-1">
+              <div className="flex flex-col gap-1">
+                {navItems.map((item, index) => (
+                  <motion.a
+                    key={item.id}
+                    href={`#${item.id}`}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="px-4 py-2 text-[11px] font-black text-[#a1a1a5] uppercase tracking-[0.1em] hover:text-cyan hover:bg-cyan/5 rounded-xl transition-colors text-left"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.03, type: 'spring', stiffness: 300 }}
+                  >
+                    {t(item.label)}
+                  </motion.a>
+                ))}
+              </div>
+              
+              {/* Separator line */}
+              <div className="h-[1px] bg-white/10 my-3 w-full" />
+
+              {/* Language switcher & theme indicator at the bottom */}
+              <div className="flex items-center justify-between px-3 pb-0.5">
+                <div className="flex items-center gap-1">
+                  <button 
+                    onClick={() => setLanguage('id')}
+                    className={`px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest transition-all hover:scale-105 active:scale-95 ${lang === 'id' ? 'border border-[#00f2fe]/45 bg-[#00f2fe]/10 text-cyan shadow-[0_0_8px_rgba(0,242,254,0.15)]' : 'text-gray-500 hover:text-cyan'}`}
+                  >
+                    ID
+                  </button>
+                  <button 
+                    onClick={() => setLanguage('en')}
+                    className={`px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest transition-all hover:scale-105 active:scale-95 ${lang === 'en' ? 'border border-[#00f2fe]/45 bg-[#00f2fe]/10 text-cyan shadow-[0_0_8px_rgba(0,242,254,0.15)]' : 'text-gray-500 hover:text-cyan'}`}
+                  >
+                    EN
+                  </button>
+                </div>
+                
+                {/* Vertical separator */}
+                <span className="text-white/10 font-light text-xs mx-1">|</span>
+
+                {/* Sun icon */}
                 <button 
-                  onClick={() => setLanguage('id')}
-                  className={`px-3 py-1 rounded-full text-[9px] font-black tracking-widest transition-all ${lang === 'id' ? 'bg-cyan/20 text-cyan border border-cyan/40' : 'text-gray-500 hover:text-cyan'}`}
+                  onClick={() => setIsSolarActive(!isSolarActive)}
+                  className={`p-2 rounded-full transition-all duration-300 ${isSolarActive ? 'text-cyan bg-cyan/10 scale-110 rotate-45' : 'text-gray-500 hover:text-white'}`}
+                  aria-label="Toggle ambient rays"
                 >
-                  ID
-                </button>
-                <button 
-                  onClick={() => setLanguage('en')}
-                  className={`px-3 py-1 rounded-full text-[9px] font-black tracking-widest transition-all ${lang === 'en' ? 'bg-cyan/20 text-cyan border border-cyan/40' : 'text-gray-500 hover:text-cyan'}`}
-                >
-                  EN
+                  <Sun size={14} className="stroke-[2.5]" />
                 </button>
               </div>
             </motion.div>
@@ -80,67 +261,102 @@ export const MainApp = () => {
         </AnimatePresence>
 
         <div className="bg-black/85 backdrop-blur-3xl saturate-200 border border-white/15 rounded-[3rem] px-6 py-3 shadow-2xl flex items-center gap-6">
-          <span className="text-[14px] font-black tracking-tighter uppercase whitespace-nowrap">AFIF<span className="text-violet-light">.</span></span>
+          <motion.a 
+            href="#home"
+            className="text-[14px] font-black tracking-tighter uppercase whitespace-nowrap flex items-center gap-0.5 cursor-pointer leading-none hover:text-white transition-colors"
+            whileHover="hover"
+          >
+            <span>AFIF</span>
+            <motion.span 
+              className="text-violet-light font-black"
+              variants={{
+                hover: { 
+                  scale: [1, 1.4, 1],
+                  rotate: [0, 15, -15, 0],
+                  transition: { duration: 0.4, ease: "easeInOut" }
+                }
+              }}
+            >
+              .
+            </motion.span>
+          </motion.a>
+
+          {/* Morphing Hamburger / X Icon */}
           <button 
             onClick={toggleMenu}
-            className="p-1 rounded-full text-gray-400 hover:text-cyan transition-all"
+            className="relative w-9 h-9 flex items-center justify-center rounded-full text-gray-400 hover:text-cyan hover:bg-white/5 transition-all outline-none"
+            aria-label="Toggle Menu"
           >
-            {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            <div className="relative w-5 h-5 flex flex-col justify-center items-center">
+              <motion.span 
+                className="absolute w-5 h-[2px] bg-current rounded-full"
+                animate={isMenuOpen ? { rotate: 45, y: 0 } : { rotate: 0, y: -5 }}
+                transition={{ type: 'spring', stiffness: 280, damping: 20 }}
+              />
+              <motion.span 
+                className="absolute w-5 h-[2px] bg-current rounded-full"
+                animate={isMenuOpen ? { opacity: 0, x: -10 } : { opacity: 1, x: 0 }}
+                transition={{ duration: 0.15 }}
+              />
+              <motion.span 
+                className="absolute w-5 h-[2px] bg-current rounded-full"
+                animate={isMenuOpen ? { rotate: -45, y: 0 } : { rotate: 0, y: 5 }}
+                transition={{ type: 'spring', stiffness: 280, damping: 20 }}
+              />
+            </div>
           </button>
-          <a href="#contact" className="bg-violet hover:bg-violet-700 text-white px-5 py-2 rounded-full text-[10px] font-black tracking-[0.1em] uppercase transition-all shadow-lg shadow-violet/30 whitespace-nowrap">
+
+          <motion.a 
+            href="#contact" 
+            className="btn-3d-violet px-5 py-2.5 rounded-full text-[10px] whitespace-nowrap leading-none inline-block"
+            whileHover={{ scale: 1.05, y: -1 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+          >
             {t('nav.cta')}
-          </a>
+          </motion.a>
         </div>
       </nav>
 
       {/* Hero Section */}
       <section id="home" className="relative min-h-screen flex flex-col justify-center items-center text-center px-6 overflow-hidden">
-        <video className="absolute inset-0 w-full h-full object-cover -z-10" autoPlay loop muted playsInline>
+        <video ref={heroVideoRef} className="absolute inset-0 w-full h-full object-cover -z-10" loop muted playsInline>
           <source src="https://res.cloudinary.com/de2tlhnd6/video/upload/f_auto,q_auto/v1778100942/CIne_Test_V2_m64jqe.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-black/55 -z-10" />
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_60%,rgba(124,58,237,0.15)_0%,transparent_65%)]" />
 
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="mb-8"
-        >
-          <div className="inline-flex items-center gap-2 px-5 py-2 glass rounded-full text-[10px] font-black text-cyan uppercase tracking-[.2em]">
-            <div className="w-1.5 h-1.5 rounded-full bg-cyan shadow-[0_0_6px_var(--color-cyan)] animate-pulse" />
-            {t('hero.sub')}
-          </div>
-        </motion.div>
-
         <motion.h1 
           className="text-6xl md:text-[9rem] font-black mb-8 tracking-tighter leading-[.85] uppercase"
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
+          initial={{ opacity: 0, y: 50, scale: 0.95 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
         >
           EDIT. <span className="gradient-text shine-anim">ELEVATE.</span><br />REPEAT.
         </motion.h1>
 
         <motion.p 
           className="text-gray-400 text-lg md:text-xl max-w-2xl mb-14 font-light leading-relaxed"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
         >
           {t('hero.desc')}
         </motion.p>
 
         <motion.div 
           className="flex gap-5"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
         >
-          <a href="#work" className="bg-violet hover:bg-violet-700 text-white px-9 py-4 rounded-2xl font-black text-sm transition-all shadow-xl shadow-violet/20">
+          <a href="#work" className="btn-3d-violet px-9 py-4 rounded-2xl font-black text-sm transition-all">
             {t('hero.btn_work')}
           </a>
-          <a href="#contact" className="glass px-9 py-4 rounded-2xl font-black text-sm hover:bg-white/10 transition-all">
+          <a href="#contact" className="btn-3d-glass px-9 py-4 rounded-2xl font-black text-sm transition-all">
             {t('hero.btn_talk')}
           </a>
         </motion.div>
@@ -175,72 +391,14 @@ export const MainApp = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section id="stats" className="py-20 border-b border-white/5 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-4 text-[10px] font-black uppercase tracking-widest text-cyan bg-cyan/10 border border-cyan/20">
-              <span className="w-2 h-2 rounded-full bg-cyan animate-pulse" />
-              Live Analytics · Mei 2026
-            </div>
-            <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight">Content <span className="gradient-text shine-anim">Performance</span> Dashboard</h2>
-            <p className="text-gray-500 text-sm mt-3">TikTok @apippppokonya & Instagram @_afif16</p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <StatCard icon={<Video size={14} />} label="TikTok Views" target={53600} color="cyan" trend="+159.1% tren naik" />
-            <StatCard icon={<Trophy size={14} />} label="TikTok Likes" target={5372} color="pink" trend="~10% like rate" />
-            <StatCard icon={<Globe size={14} />} label="IG Reach" target={7252} color="violet" trend="61.9% Non-followers" />
-            <StatCard icon={<Monitor size={14} />} label="IG Total Views" target={30783} color="orange" trend="Stories + Reels" />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-2 glass p-7 rounded-3xl">
-               <div className="flex items-center justify-between mb-8">
-                <h3 className="text-xs font-black text-white uppercase tracking-widest">🏆 Top TikTok Videos</h3>
-                <span className="text-[9px] font-black text-cyan px-2 py-1 rounded-full bg-cyan/10">@apippppokonya</span>
-              </div>
-              <div className="space-y-6">
-                <ProgressBar label="#1 · #sunset #fyp" views={9660} percentage={100} likes="1,134" color="cyan" />
-                <ProgressBar label="#2 · #aesthetic #photography #bandung" views={8691} percentage={90} likes="1,114" color="cyan" />
-                <ProgressBar label="#3 · lupa up #fyp #sunset" views={6885} percentage={71} likes="468" color="violet" />
-              </div>
-            </div>
-            <div className="glass p-7 rounded-3xl">
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-xs font-black text-white uppercase tracking-widest">📊 IG Distribution</h3>
-                <span className="text-[9px] font-black text-violet-light px-2 py-1 rounded-full bg-violet/10">@_afif16</span>
-              </div>
-              <div className="flex justify-center mb-8">
-                <div className="relative w-32 h-32 flex items-center justify-center">
-                  <svg className="absolute inset-0 transform -rotate-90" viewBox="0 0 36 36">
-                    <circle cx="18" cy="18" r="16" fill="none" className="stroke-white/5" strokeWidth="4" />
-                    <circle cx="18" cy="18" r="16" fill="none" className="stroke-cyan" strokeWidth="4" strokeDasharray="56 100" strokeLinecap="round" />
-                    <circle cx="18" cy="18" r="16" fill="none" className="stroke-violet" strokeWidth="4" strokeDasharray="43 100" strokeDashoffset="-56" strokeLinecap="round" />
-                  </svg>
-                  <div className="text-center">
-                    <div className="text-sm font-black text-white">100%</div>
-                    <div className="text-[9px] text-gray-500 uppercase">Content</div>
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-3">
-                <DistributionItem label="Stories" percentage="56.0%" color="bg-cyan" />
-                <DistributionItem label="Reels" percentage="43.2%" color="bg-violet" />
-                <DistributionItem label="Posts" percentage="0.8%" color="bg-pink-400" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* About Section */}
       <section id="about" className="max-w-6xl mx-auto px-6 py-32">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
+            initial={{ opacity: 0, x: -40, scale: 0.98 }}
+            whileInView={{ opacity: 1, x: 0, scale: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
           >
             <p className="text-[10px] font-black uppercase tracking-[.35em] text-violet mb-4">{t('about.subtitle')}</p>
             <h2 className="text-4xl md:text-5xl font-bold mb-8 leading-tight italic">
@@ -263,9 +421,10 @@ export const MainApp = () => {
 
           <motion.div
             className="glass p-8 rounded-[2rem] flex flex-col gap-6"
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
+            initial={{ opacity: 0, x: 40, scale: 0.98 }}
+            whileInView={{ opacity: 1, x: 0, scale: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
           >
             <AboutMetric icon={<Camera />} title={t('about.role1_title')} desc={t('about.role1_desc')} color="cyan" />
             <AboutMetric icon={<Monitor />} title={t('about.role2_title')} desc={t('about.role2_desc')} color="violet" />
@@ -317,6 +476,13 @@ export const MainApp = () => {
             color="cyan"
           />
           <WorkItem 
+            videoUrl="https://res.cloudinary.com/de2tlhnd6/video/upload/v1778518799/NIGHT_REVISED_fmtpty.mov"
+            tag="NIGHT CINEMATIC · LOW LIGHT"
+            title="Night Aesthetics"
+            desc="Teknik color grading redup premium untuk menangkap nuansa misterius dan dramatis atmosfer malam hari."
+            color="cyan"
+          />
+          <WorkItem 
             videoUrl="https://res.cloudinary.com/de2tlhnd6/video/upload/f_auto,q_auto/v1778043739/Salma_Aulia_NOWM_1_rvv8se.mp4"
             tag="INSTAGRAM REELS"
             title="Salma Aulia"
@@ -352,45 +518,6 @@ export const MainApp = () => {
             <p className="text-gray-500 text-sm">{t('work.before')} & {t('work.after')}</p>
           </motion.div>
           <ColorComparison />
-        </div>
-      </section>
-
-      {/* Collaborative Process Section */}
-      <section id="workflow" className="py-32 border-y border-white/5 bg-white/[0.01]">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <p className="text-[10px] font-black uppercase tracking-[.35em] text-violet mb-4">{t('process.subtitle')}</p>
-            <h2 className="text-3xl font-black uppercase tracking-tight">Our <span className="gradient-text shine-anim">Collaborative</span> Process</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <ProcessStep step="01" title={t('process.q1')} desc={t('process.a1')} icon={<Clock />} color="cyan" />
-            <ProcessStep step="02" title={t('process.q2')} desc={t('process.a2')} icon={<Zap />} color="violet" />
-            <ProcessStep step="03" title={t('process.q3')} desc={t('process.a3')} icon={<Layers />} color="cyan" />
-            <ProcessStep step="04" title={t('process.q4')} desc={t('process.a4')} icon={<Send />} color="violet" />
-          </div>
-        </div>
-      </section>
-
-      {/* Project Workflow Section */}
-      <section id="project-workflow" className="max-w-7xl mx-auto px-6 py-32">
-        <div className="text-center mb-16">
-          <p className="text-[10px] font-black uppercase tracking-[.35em] text-cyan mb-4">{t('workflow.subtitle')}</p>
-          <h2 className="text-3xl font-black uppercase tracking-tight">Project <span className="gradient-text shine-anim">Workflow</span></h2>
-          <p className="text-gray-400 text-sm max-w-xl mx-auto mt-4">{t('workflow.desc')}</p>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
-          {[1,2,3,4,5,6,7].map((i) => (
-            <motion.div 
-              key={i}
-              className="glass p-6 rounded-2xl group hover:scale-[1.02] transition-all"
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.1 }}
-            >
-              <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">{`0${i}`} {t(`workflow.step${i}`).split(' ').slice(1).join(' ')}</div>
-              <p className="text-[10px] text-gray-400 leading-relaxed">{t(`workflow.desc${i}`)}</p>
-            </motion.div>
-          ))}
         </div>
       </section>
 
@@ -433,14 +560,146 @@ export const MainApp = () => {
         </div>
       </section>
 
+      {/* Collaborative Process Section */}
+      <section id="workflow" className="py-32 border-y border-white/5 bg-white/[0.01] overflow-hidden">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <p className="text-[10px] font-black uppercase tracking-[.35em] text-violet mb-4">{t('process.subtitle')}</p>
+            <h2 className="text-3xl font-black uppercase tracking-tight mb-6">Our <span className="gradient-text shine-anim">Collaborative</span> Process</h2>
+            <SwipeIndicator />
+          </div>
+          <div className="flex overflow-x-auto md:grid md:grid-cols-4 gap-6 pb-6 pt-2 px-4 -mx-6 md:mx-0 md:px-0 snap-x snap-mandatory no-scrollbar">
+            <ProcessStep step="01" title={t('process.q1')} desc={t('process.a1')} icon={<Clock />} color="cyan" />
+            <ProcessStep step="02" title={t('process.q2')} desc={t('process.a2')} icon={<Zap />} color="violet" />
+            <ProcessStep step="03" title={t('process.q3')} desc={t('process.a3')} icon={<Layers />} color="cyan" />
+            <ProcessStep step="04" title={t('process.q4')} desc={t('process.a4')} icon={<Send />} color="violet" />
+          </div>
+        </div>
+      </section>
+ 
+       {/* Project Workflow Section */}
+       <section id="project-workflow" className="max-w-7xl mx-auto px-6 py-32 overflow-hidden">
+         <div className="text-center mb-16">
+           <p className="text-[10px] font-black uppercase tracking-[.35em] text-cyan mb-4">{t('workflow.subtitle')}</p>
+           <h2 className="text-3xl font-black uppercase tracking-tight">Project <span className="gradient-text shine-anim">Workflow</span></h2>
+           <p className="text-gray-400 text-sm max-w-xl mx-auto mt-4 mb-6">{t('workflow.desc')}</p>
+           <SwipeIndicator />
+         </div>
+         <div className="flex overflow-x-auto md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 pb-6 pt-2 px-4 -mx-6 md:mx-0 md:px-0 snap-x snap-mandatory no-scrollbar">
+           {[1,2,3,4,5,6,7].map((i) => (
+             <motion.div 
+               key={i}
+               className="glass card-3d-kinetic p-6 rounded-2xl group shrink-0 w-[220px] md:w-auto snap-center"
+               initial={{ opacity: 0, scale: 0.9, y: 20 }}
+               whileInView={{ opacity: 1, scale: 1, y: 0 }}
+               viewport={{ once: true }}
+               transition={{ delay: i * 0.08, type: 'spring', stiffness: 100 }}
+             >
+               <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">{`0${i}`} {t(`workflow.step${i}`).split(' ').slice(1).join(' ')}</div>
+               <p className="text-[10px] text-gray-400 leading-relaxed">{t(`workflow.desc${i}`)}</p>
+             </motion.div>
+           ))}
+         </div>
+       </section>
+
+      {/* Stats Section */}
+      <section id="stats" className="py-20 border-b border-white/5 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-4 text-[10px] font-black uppercase tracking-widest text-cyan bg-cyan/10 border border-cyan/20">
+              <span className="w-2 h-2 rounded-full bg-cyan animate-pulse" />
+              Live Analytics · Mei 2026
+            </div>
+            <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight">Content <span className="gradient-text shine-anim">Performance</span> Dashboard</h2>
+            <p className="text-gray-500 text-sm mt-3">TikTok @apippppokonya & Instagram @_afif16</p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <StatCard 
+              icon={<Video size={14} />} 
+              label="TikTok Views" 
+              target={tiktokViewsVal} 
+              color="cyan" 
+              trend="+159.1% tren naik" 
+              flash={flashCard.tiktokViews || flashCard.topVid1 || flashCard.topVid2 || flashCard.topVid3} 
+            />
+            <StatCard 
+              icon={<Trophy size={14} />} 
+              label="TikTok Likes" 
+              target={tiktokLikesVal} 
+              color="pink" 
+              trend="~10% like rate" 
+              flash={flashCard.tiktokLikes} 
+            />
+            <StatCard 
+              icon={<Globe size={14} />} 
+              label="IG Reach" 
+              target={igReachVal} 
+              color="violet" 
+              trend="61.9% Non-followers" 
+              flash={flashCard.igReach} 
+            />
+            <StatCard 
+              icon={<Monitor size={14} />} 
+              label="IG Total Views" 
+              target={igTotalViewsVal} 
+              color="orange" 
+              trend="Stories + Reels" 
+              flash={flashCard.igTotalViews} 
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-2 glass p-7 rounded-3xl">
+               <div className="flex items-center justify-between mb-8">
+                <h3 className="text-xs font-black text-white uppercase tracking-widest">🏆 Top TikTok Videos</h3>
+                <span className="text-[9px] font-black text-cyan px-2 py-1 rounded-full bg-cyan/10">@apippppokonya</span>
+              </div>
+              <div className="space-y-6">
+                <ProgressBar label="#1 · #sunset #fyp" views={topVid1} percentage={Math.min(100, Math.floor((topVid1 / 10000) * 100))} likes="1,134" color="cyan" />
+                <ProgressBar label="#2 · #aesthetic #photography #bandung" views={topVid2} percentage={Math.min(100, Math.floor((topVid2 / 10000) * 100))} likes="1,114" color="cyan" />
+                <ProgressBar label="#3 · lupa up #fyp #sunset" views={topVid3} percentage={Math.min(100, Math.floor((topVid3 / 10000) * 100))} likes="468" color="violet" />
+              </div>
+            </div>
+            <div className="glass p-7 rounded-3xl flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-xs font-black text-white uppercase tracking-widest">📊 IG Distribution</h3>
+                  <span className="text-[9px] font-black text-violet-light px-2 py-1 rounded-full bg-violet/10">@_afif16</span>
+                </div>
+                <div className="flex justify-center mb-8">
+                  <div className="relative w-32 h-32 flex items-center justify-center">
+                    <svg className="absolute inset-0 transform -rotate-90" viewBox="0 0 36 36">
+                      <circle cx="18" cy="18" r="16" fill="none" className="stroke-white/5" strokeWidth="4" />
+                      <circle cx="18" cy="18" r="16" fill="none" className="stroke-cyan" strokeWidth="4" strokeDasharray="56 100" strokeLinecap="round" />
+                      <circle cx="18" cy="18" r="16" fill="none" className="stroke-violet" strokeWidth="4" strokeDasharray="43 100" strokeDashoffset="-56" strokeLinecap="round" />
+                    </svg>
+                    <div className="text-center">
+                      <div className="text-sm font-black text-white">100%</div>
+                      <div className="text-[9px] text-gray-500 uppercase">Content</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <DistributionItem label="Stories" percentage="56.0%" color="bg-cyan" />
+                <DistributionItem label="Reels" percentage="43.2%" color="bg-violet" />
+                <DistributionItem label="Posts" percentage="0.8%" color="bg-pink-400" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Pricing Section */}
-      <section id="pricing" className="py-24 max-w-6xl mx-auto px-6">
+      <section id="pricing" className="py-24 max-w-6xl mx-auto px-6 overflow-hidden">
          <div className="text-center mb-14">
           <p className="slabel text-cyan mb-4">{t('pricing.subtitle')}</p>
           <h2 className="text-3xl font-bold uppercase tracking-tight">Our Rate <span className="gradient-text shine-anim">Card</span></h2>
-          <p className="text-gray-400 text-sm max-w-xl mx-auto mt-4">{t('pricing.desc')}</p>
+          <p className="text-gray-400 text-sm max-w-xl mx-auto mt-4 mb-6">{t('pricing.desc')}</p>
+          <SwipeIndicator />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="flex overflow-x-auto md:grid md:grid-cols-3 gap-8 pb-8 pt-4 px-4 -mx-6 md:mx-0 md:px-0 snap-x snap-mandatory no-scrollbar">
           <PricingCard 
             title="Short-Form" 
             price="Rp 350rb" 
@@ -521,12 +780,12 @@ export const MainApp = () => {
 
             <motion.a 
               href="mailto:afifm192@gmail.com"
-              className="relative z-10 inline-flex items-center gap-3 bg-white text-black px-14 py-5 rounded-2xl font-black text-sm hover:bg-cyan hover:scale-105 transition-all duration-300 uppercase tracking-tight shadow-2xl shadow-white/10"
-              whileHover={{ y: -5 }}
+              className="relative z-10 inline-flex items-center gap-3 btn-3d-white px-14 py-5 rounded-2xl text-sm"
+              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Send size={20} />
-              {t('contact.btn')}
+              <Send size={18} className="stroke-[2.5]" />
+              <span>{t('contact.btn')}</span>
             </motion.a>
           </div>
         </div>
@@ -541,24 +800,42 @@ export const MainApp = () => {
   );
 };
 
-const StatCard = ({ icon, label, target, color, trend }: { icon: React.ReactNode, label: string, target: number, color: string, trend: string }) => (
-  <div className="glass p-6 rounded-3xl relative overflow-hidden group">
+const StatCard = ({ icon, label, target, color, trend, flash }: { icon: React.ReactNode, label: string, target: number, color: string, trend: string, flash?: boolean }) => (
+  <motion.div 
+    className={`glass card-3d-kinetic p-6 rounded-3xl relative overflow-hidden group transition-all duration-300 ${
+      flash ? 'border-emerald-500/40 bg-emerald-500/[0.02] shadow-[0_0_25px_rgba(16,185,129,0.15)] -translate-y-1' : ''
+    }`}
+    initial={{ opacity: 0, scale: 0.95 }}
+    whileInView={{ opacity: 1, scale: 1 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.5 }}
+  >
     <div className={`absolute top-0 right-0 w-24 h-24 rounded-full bg-${color}/5 -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-150 transition-transform duration-700`} />
-    <div className="flex items-center gap-2 mb-4">
-      <div className={`p-2.5 rounded-xl bg-${color}/10 text-${color}`}>
-        {icon}
+    <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center gap-2">
+        <div className={`p-2.5 rounded-xl bg-${color}/10 text-${color} group-hover:scale-110 transition-transform`}>
+          {icon}
+        </div>
+        <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.15em]">{label}</span>
       </div>
-      <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.15em]">{label}</span>
+      
+      {/* Live Flashing Dot */}
+      <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full tracking-widest flex items-center gap-1.5 transition-colors duration-300 ${
+        flash ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-[#00f2fe]/10 text-cyan/80 border border-[#00f2fe]/10'
+      }`}>
+        <span className={`w-1 h-1 rounded-full ${flash ? 'bg-emerald-400 animate-ping' : 'bg-cyan animate-pulse'}`} />
+        {flash ? 'UPDATING' : 'LIVE'}
+      </span>
     </div>
-    <div className={`text-3xl md:text-4xl font-black text-${color}/90`}>
+    <div className={`text-3xl md:text-4xl font-black text-${color}/90 group-hover:text-white transition-colors duration-300 ${flash ? 'text-white' : ''}`}>
       <Counter target={target} />
     </div>
     <div className="flex items-center gap-2 mt-3">
-      <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-emerald-400/10 text-emerald-400 border border-emerald-400/20">
+      <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-emerald-400/10 text-emerald-400 border border-emerald-400/20 group-hover:bg-emerald-400/20 transition-all">
         {trend}
       </span>
     </div>
-  </div>
+  </motion.div>
 );
 
 const ProgressBar = ({ label, views, percentage, likes, color }: { label: string, views: number, percentage: number, likes: string, color: string }) => (
@@ -591,36 +868,57 @@ const DistributionItem = ({ label, percentage, color }: { label: string, percent
   </div>
 );
 
-const PricingCard = ({ title, price, unit, description, featured, color }: { title: string, price: string, unit?: string, description: string, featured?: boolean, color: string }) => (
-  <motion.div 
-    className={`glass p-10 rounded-[2.5rem] flex flex-col h-full relative transition-all duration-500 ${featured ? 'border-violet/40 bg-violet/5 scale-105 shadow-2xl shadow-violet/10' : 'hover:scale-[1.02]'}`}
-    initial={{ opacity: 0, y: 30 }}
-    whileInView={{ opacity: 1, y: 0 }}
-  >
-    {featured && (
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-violet text-white text-[9px] font-black uppercase tracking-[0.2em] px-5 py-1.5 rounded-full shadow-lg">
-        Best Value
+const PricingCard = ({ title, price, unit, description, featured, color }: { title: string, price: string, unit?: string, description: string, featured?: boolean, color: string }) => {
+  const { t } = useTranslation();
+  
+  const getWhatsAppHref = () => {
+    const baseUrl = "https://wa.me/6282350241418";
+    let message = `Halo Afif, saya tertarik dengan paket ${title}.`;
+    if (title === "Full Brand") {
+      message = "Halo Afif, saya tertarik untuk kerja sama paket Full Brand.";
+    }
+    return `${baseUrl}?text=${encodeURIComponent(message)}`;
+  };
+
+  return (
+    <motion.div 
+      className={`glass card-3d-kinetic p-10 rounded-[2.5rem] flex flex-col h-full relative shrink-0 w-[280px] sm:w-[320px] md:w-auto snap-center ${featured ? 'border-violet/45 bg-violet/5 scale-100 md:scale-105 shadow-[0_15px_40px_rgba(124,58,237,0.15)] md:hover:scale-[1.07]' : ''}`}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6 }}
+    >
+      {featured && (
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-violet text-white text-[9px] font-black uppercase tracking-[0.2em] px-5 py-1.5 rounded-full shadow-lg z-10">
+          Best Value
+        </div>
+      )}
+      <h3 className={`text-base font-black uppercase mb-3 tracking-widest text-${color}`}>{title}</h3>
+      <div className="flex items-baseline gap-1 mb-4">
+        <div className="text-4xl font-black text-white">{price}</div>
+        {unit && <span className="text-[11px] text-gray-600 font-bold uppercase tracking-widest">{unit}</span>}
       </div>
-    )}
-    <h3 className={`text-base font-black uppercase mb-3 tracking-widest text-${color}`}>{title}</h3>
-    <div className="flex items-baseline gap-1 mb-4">
-      <div className="text-4xl font-black text-white">{price}</div>
-      {unit && <span className="text-[11px] text-gray-600 font-bold uppercase tracking-widest">{unit}</span>}
-    </div>
-    <p className="text-[11px] text-gray-400 leading-relaxed mb-10 flex-grow" dangerouslySetInnerHTML={{ __html: description }} />
-    <button className={`w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${featured ? 'bg-violet hover:bg-violet-700 text-white shadow-xl shadow-violet/25' : 'glass hover:bg-white/10 text-white'}`}>
-      Select Plan
-    </button>
-  </motion.div>
-);
+      <p className="text-[11px] text-gray-400 leading-relaxed mb-10 flex-grow" dangerouslySetInnerHTML={{ __html: description }} />
+      <a 
+        href={getWhatsAppHref()} 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        className={`w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all text-center ${featured ? 'btn-3d-violet text-white hover:text-white' : 'btn-3d-glass text-cyan hover:text-cyan'}`}
+      >
+        {t('pricing.select')}
+      </a>
+    </motion.div>
+  );
+};
 
 const ContactLink = ({ icon, label, href }: { icon: React.ReactNode, label: string, href: string }) => (
   <motion.a 
     href={href}
     target="_blank"
     rel="noopener noreferrer"
-    className="flex flex-col items-center gap-3 p-6 glass rounded-2xl group transition-all"
-    whileHover={{ y: -5, backgroundColor: 'rgba(255,255,255,0.08)' }}
+    className="flex flex-col items-center gap-3 p-6 glass card-3d-kinetic rounded-2xl group"
+    whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.08)' }}
+    whileTap={{ scale: 0.95 }}
   >
     <div className="text-gray-400 group-hover:text-cyan transition-colors">
       {React.cloneElement(icon as React.ReactElement, { size: 28 })}
@@ -643,48 +941,107 @@ const AboutMetric = ({ icon, title, desc, color }: { icon: React.ReactNode, titl
 
 const ToolCard = ({ icon, title, desc, color }: { icon: React.ReactNode, title: string, desc: string, color: string }) => (
   <motion.div 
-    className="glass p-8 rounded-[2rem] group hover:scale-[1.02] transition-all duration-500"
-    initial={{ opacity: 0, y: 20 }}
+    className="glass card-3d-kinetic p-8 rounded-[2rem] group"
+    initial={{ opacity: 0, y: 40 }}
     whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: '-50px' }}
+    transition={{ duration: 0.6, ease: 'easeOut' }}
   >
-    <div className={`p-4 rounded-xl w-fit mb-6 bg-${color}/10 text-${color} group-hover:rotate-12 transition-transform`}>
+    <div className={`p-4 rounded-xl w-fit mb-6 bg-${color}/10 text-${color} group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 shadow-[0_0_15px_rgba(255,255,255,0.02)]`}>
       {icon}
     </div>
-    <h4 className="text-[10px] font-black text-gray-400 uppercase mb-3 tracking-[.2em]">{title}</h4>
-    <p className="text-xs text-gray-500 leading-relaxed italic">{desc}</p>
+    <h4 className="text-[10px] font-black text-white uppercase mb-3 tracking-[.2em] group-hover:text-cyan transition-colors duration-300">{title}</h4>
+    <p className="text-xs text-gray-400 leading-relaxed italic group-hover:text-gray-300 transition-colors duration-300">{desc}</p>
   </motion.div>
 );
 
-const WorkItem = ({ videoUrl, tag, title, desc, color }: { videoUrl: string, tag: string, title: string, desc: string, color: string }) => (
-  <motion.div 
-    className="glass p-6 rounded-[2.5rem] flex flex-col gap-6 group hover:scale-[1.01]"
-    initial={{ opacity: 0, y: 40 }}
-    whileInView={{ opacity: 1, y: 0 }}
-  >
-    <div className="aspect-[9/16] rounded-[1.8rem] overflow-hidden bg-black/20 relative">
-      <video className="w-full h-full object-cover transform scale-100 group-hover:scale-105 transition-transform duration-700" muted loop playsInline autoPlay src={videoUrl} />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+const WorkItem = ({ videoUrl, tag, title, desc, color }: { videoUrl: string, tag: string, title: string, desc: string, color: string }) => {
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+
+  React.useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      },
+      { threshold: 0.05, rootMargin: '150px' }
+    );
+
+    observer.observe(video);
+    return () => {
+      observer.unobserve(video);
+    };
+  }, []);
+
+  return (
+    <motion.div 
+      className="glass card-3d-kinetic p-6 rounded-[2.5rem] flex flex-col gap-6 group"
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-100px' }}
+      transition={{ duration: 0.7, ease: 'easeOut' }}
+    >
+      <div className="aspect-[9/16] rounded-[1.8rem] overflow-hidden bg-black/20 relative shadow-2xl">
+        <video 
+          ref={videoRef}
+          className="w-full h-full object-cover transform scale-100 group-hover:scale-[1.03] transition-transform duration-700" 
+          muted 
+          loop 
+          playsInline 
+          src={videoUrl} 
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-40 group-hover:opacity-80 transition-opacity duration-500" />
+      </div>
+      <div className="px-2">
+        <span className={`text-[9px] font-black uppercase tracking-[.25em] text-${color}`}>{tag}</span>
+        <h3 className="text-2xl font-black text-white mt-2 mb-3 group-hover:text-cyan transition-colors duration-300">{title}</h3>
+        <p className="text-xs text-gray-400 leading-relaxed font-light group-hover:text-gray-300 transition-colors duration-300">{desc}</p>
+      </div>
+    </motion.div>
+  );
+};
+
+const SwipeIndicator = ({ className = "" }: { className?: string }) => {
+  return (
+    <div className={`md:hidden flex items-center justify-center gap-2 text-[9px] font-bold uppercase tracking-[0.2em] text-cyan bg-cyan/5 border border-cyan/10 py-1.5 px-4 rounded-full w-fit mx-auto mb-4 ${className}`}>
+      <span className="relative flex h-1.5 w-1.5 shrink-0">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan/60 opacity-75"></span>
+        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan animate-[pulse_1.5s_infinite]"></span>
+      </span>
+      <span className="opacity-80">Swipe / Geser</span>
+      <motion.div
+        animate={{ x: [-3, 3, -3] }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+        className="flex items-center shrink-0"
+      >
+        <svg className="w-3.5 h-3.5 text-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        </svg>
+      </motion.div>
     </div>
-    <div className="px-2">
-      <span className={`text-[9px] font-black uppercase tracking-[.25em] text-${color}`}>{tag}</span>
-      <h3 className="text-2xl font-black text-white mt-2 mb-3">{title}</h3>
-      <p className="text-xs text-gray-400 leading-relaxed font-light">{desc}</p>
-    </div>
-  </motion.div>
-);
+  );
+};
 
 const ProcessStep = ({ step, title, desc, icon, color }: { step: string, title: string, desc: string, icon: React.ReactNode, color: string }) => (
   <motion.div 
-    className="glass p-8 rounded-[2rem] hover:scale-[1.02] transition-all"
-    initial={{ opacity: 0, y: 20 }}
+    className="glass card-3d-kinetic p-8 rounded-[2rem] group shrink-0 w-[240px] md:w-auto snap-center"
+    initial={{ opacity: 0, y: 40 }}
     whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: '-50px' }}
+    transition={{ duration: 0.6, ease: 'easeOut' }}
   >
-    <div className={`p-3.5 rounded-xl w-fit mb-6 bg-${color}/10 text-${color}`}>
+    <div className={`p-3.5 rounded-xl w-fit mb-6 bg-${color}/10 text-${color} group-hover:scale-110 group-hover:rotate-12 transition-all duration-300`}>
       {React.cloneElement(icon as React.ReactElement, { size: 18 })}
     </div>
-    <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-2">STEP {step}</p>
-    <h4 className="text-base font-black text-white mb-3 tracking-tight">{title}</h4>
-    <p className="text-[11px] text-gray-500 leading-relaxed line-clamp-3">{desc}</p>
+    <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-2 group-hover:text-cyan/80 transition-colors">STEP {step}</p>
+    <h4 className="text-base font-black text-white mb-3 tracking-tight group-hover:text-white transition-colors">{title}</h4>
+    <p className="text-[11px] text-gray-400 leading-relaxed line-clamp-3 group-hover:text-gray-300 transition-colors">{desc}</p>
   </motion.div>
 );
 
@@ -693,8 +1050,10 @@ const TimelineItem = ({ year, title, role, descs, align }: { year: string, title
   return (
     <motion.div 
       className={`relative w-full mb-10 md:mb-16 flex flex-col ${align === 'right' ? 'md:items-end md:pr-[50%] pr-4 md:text-right' : 'md:items-start md:pl-[50%] pl-4 md:text-left'} text-left`}
-      initial={{ opacity: 0, x: align === 'right' ? -30 : 30 }}
-      whileInView={{ opacity: 1, x: 0 }}
+      initial={{ opacity: 0, x: align === 'right' ? -40 : 40, y: 15 }}
+      whileInView={{ opacity: 1, x: 0, y: 0 }}
+      viewport={{ once: true, margin: '-100px' }}
+      transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
     >
       <div className={`absolute top-6 w-3 h-3 bg-cyan rounded-full border-4 border-bg shadow-[0_0_15px_rgba(0,242,254,0.6)] z-10 transition-transform hover:scale-150 ${align === 'right' ? 'md:left-1/2 md:-translate-x-1/2 left-[-1.15rem]' : 'md:left-1/2 md:-translate-x-1/2 left-[-1.15rem]'}`} />
       

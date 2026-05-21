@@ -1,26 +1,39 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
-export const Counter = ({ target, duration = 2000 }: { target: number, duration?: number }) => {
-  const [count, setCount] = useState(0);
+export const Counter = ({ target, duration = 800 }: { target: number, duration?: number }) => {
+  const [count, setCount] = useState(target);
+  const prevTargetRef = useRef(target);
 
   useEffect(() => {
-    let start = 0;
+    const start = count;
     const end = target;
-    const range = end - start;
-    const increment = end / (duration / 16);
-    
-    let current = start;
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= end) {
-        setCount(end);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(current));
-      }
-    }, 16);
+    if (start === end) return;
 
-    return () => clearInterval(timer);
+    const startTime = performance.now();
+    let animationFrameId: number;
+
+    const updateCount = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Easing function: easeOutQuad
+      const ease = progress * (2 - progress);
+      const currentVal = Math.floor(start + (end - start) * ease);
+      
+      setCount(currentVal);
+
+      if (progress < 1) {
+        animationFrameId = requestAnimationFrame(updateCount);
+      } else {
+        setCount(end);
+      }
+    };
+
+    animationFrameId = requestAnimationFrame(updateCount);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
   }, [target, duration]);
 
   return <span>{count.toLocaleString('id-ID')}</span>;

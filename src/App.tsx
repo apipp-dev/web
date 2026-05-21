@@ -5,12 +5,10 @@
 
 import { LanguageProvider } from './context/LanguageContext';
 import { MainApp } from './components/MainApp';
-import { CustomCursor } from './components/CustomCursor';
 
 export default function App() {
   return (
     <LanguageProvider>
-      <CustomCursor />
       <MainApp />
     </LanguageProvider>
   );
