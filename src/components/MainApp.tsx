@@ -6,11 +6,11 @@ import { Counter } from './Counter';
 import { ColorComparison } from './ColorComparison';
 import { dailyStats, tiktokVideos, followerHistory, followerActivity, genderDistribution, territoriesDistribution, instagramInsights } from '../data/tiktokData';
 
-const urlCoastalViews = new URL('../assets/images/ig_post_1.png', import.meta.url).href;
-const urlArtGalleryVlog = new URL('../assets/images/ig_post_2.png', import.meta.url).href;
-const urlMarketMerdeka = new URL('../assets/images/ig_post_3.png', import.meta.url).href;
-const urlMoodReset = new URL('../assets/images/ig_post_4.png', import.meta.url).href;
-const urlMilkyWaySky = new URL('../assets/images/ig_post_5.png', import.meta.url).href;
+const urlCoastalViews = new URL('../assets/images/1.jpg', import.meta.url).href;
+const urlArtGalleryVlog = new URL('../assets/images/2.png', import.meta.url).href;
+const urlMarketMerdeka = new URL('../assets/images/3.png', import.meta.url).href;
+const urlMoodReset = new URL('../assets/images/4.png', import.meta.url).href;
+const urlMilkyWaySky = new URL('../assets/images/5.png', import.meta.url).href;
 
 const igThumbnails = [
   urlCoastalViews,
