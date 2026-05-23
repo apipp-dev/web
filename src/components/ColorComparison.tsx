@@ -93,6 +93,7 @@ export const ColorComparison = () => {
     if (!beforeVideo || !afterVideo) return;
 
     const handlePlay = () => {
+      beforeVideo.currentTime = afterVideo.currentTime;
       beforeVideo.play().catch(() => {});
     };
 
@@ -108,19 +109,11 @@ export const ColorComparison = () => {
       beforeVideo.playbackRate = afterVideo.playbackRate;
     };
 
-    const handleTimeUpdate = () => {
-      // Keep them strictly aligned when playing (within 0.05 seconds threshold)
-      if (Math.abs(beforeVideo.currentTime - afterVideo.currentTime) > 0.05) {
-        beforeVideo.currentTime = afterVideo.currentTime;
-      }
-    };
-
     afterVideo.addEventListener('play', handlePlay);
     afterVideo.addEventListener('pause', handlePause);
     afterVideo.addEventListener('seeking', handleSeeking);
     afterVideo.addEventListener('seeked', handleSeeking);
     afterVideo.addEventListener('ratechange', handleRateChange);
-    afterVideo.addEventListener('timeupdate', handleTimeUpdate);
 
     // Initial check: align
     beforeVideo.currentTime = afterVideo.currentTime;
@@ -131,7 +124,6 @@ export const ColorComparison = () => {
       afterVideo.removeEventListener('seeking', handleSeeking);
       afterVideo.removeEventListener('seeked', handleSeeking);
       afterVideo.removeEventListener('ratechange', handleRateChange);
-      afterVideo.removeEventListener('timeupdate', handleTimeUpdate);
     };
   }, []);
 

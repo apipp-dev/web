@@ -125,9 +125,9 @@
 }
 
 @keyframes liquidMove {
-  0%   { transform: scale(1) translate(0,0); }
-  50%  { transform: scale(1.1) translate(3%,2%); }
-  100% { transform: scale(1) translate(-2%,-3%); }
+  0%   { transform: scale(1) translate3d(0,0,0); }
+  50%  { transform: scale(1.08) translate3d(3%,2%,0); }
+  100% { transform: scale(1) translate3d(-1%,-2%,0); }
 }
 
 .liquid-bg {
@@ -135,7 +135,10 @@
   background:
     radial-gradient(circle at 15% 25%, rgba(124,58,237,.14) 0%, transparent 45%),
     radial-gradient(circle at 85% 75%, rgba(0,242,254,.1) 0%, transparent 45%);
-  animation: liquidMove 20s ease-in-out infinite alternate;
+  animation: liquidMove 25s ease-in-out infinite alternate;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translate3d(0,0,0);
 }
 
 /* Custom Scrollbar */
